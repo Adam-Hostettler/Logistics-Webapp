@@ -1,0 +1,247 @@
+﻿@Styles.Render("~/Logistics/css")
+<h2>List of New Tickets:</h2>
+<div>
+    <table>
+        <tr>
+            <th>Ticket ID</th>
+            <th>Ticket Status</th>
+            <th>Part Number</th>
+            <th>Quantity</th>
+            <th>Dropoff Location</th>
+            <th>Assign To</th>
+            <th>Action</th>
+        </tr>
+        <tbody id="ticketsUnassigned"></tbody>
+    </table>
+</div>
+<h2>List of Assigned Tickets:</h2>
+<div>
+    <table>
+        <tr>
+            <th>Ticket ID</th>
+            <th>Ticket Status</th>
+            <th>Part Number</th>
+            <th>Quantity</th>
+            <th>Dropoff Location</th>
+            <th>Assign To</th>
+            <th>Action</th>
+        </tr>
+        <tbody id="ticketsAssigned"></tbody>
+    </table>
+</div>
+<h2>List of Tickets For Review:</h2>
+<div>
+    <table>
+        <tr>
+            <th>Ticket ID</th>
+            <th>Ticket Status</th>
+            <th>Part Number</th>
+            <th>Quantity</th>
+            <th>Dropoff Location</th>
+            <th>Assign To</th>
+            <th>Action</th>
+        </tr>
+        <tbody id="ticketsReview"></tbody>
+    </table>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+<script type="text/javascript">
+
+    var users = {};
+
+    $(document).ready(function () {
+        GetUsers();
+        GetTickets();
+        GetReviewTickets();
+    });
+
+    function GetTickets() {
+        $("#ticketsUnassigned").empty();
+        $("#ticketsAssigned").empty();
+
+        var uri = '../api/ticket';
+        $.ajax({
+            type: 'GET',
+            url: uri,
+            contentType: "application/json; charset=utf-8",
+            dataType: 'json'
+        }).done(function (data) {
+            var htmlUnassigned = "";
+            var htmlAssigned = "";
+
+            jQuery.each(data,
+                function (index, item) {
+
+                    if (item.Status > 1) {
+
+                    } else {
+
+                        if (item.AssignedToUserID == null) {
+                            htmlUnassigned += "<tr><td>" +
+                                item.ID +
+                                "</td><td>" +
+                                item.Status +
+                                "</td><td>" +
+                                item.ProductNumber +
+                                "</td><td>" +
+                                item.Quantity +
+                                "</td><td>" +
+                                item.DropoffLocation +
+                                "</td><td class='listofusers'>" +
+                                "</td><td><button onClick='assignUser(" +
+                                item.ID +
+                                ", this" +
+                                ")'>Assign</button>" +
+                                "</td></tr>";
+                        } else {
+                            htmlAssigned += "<tr><td>" +
+                                item.ID +
+                                "</td><td>" +
+                                item.Status +
+                                "</td><td>" +
+                                item.ProductNumber +
+                                "</td><td>" +
+                                item.Quantity +
+                                "</td><td>" +
+                                item.DropoffLocation +
+                                "</td><td>" +
+                                getUserName(item.AssignedToUserID) +
+                                "</td><td><button onClick='removeAssigned(" +
+                                item.ID +
+                                ", this" +
+                                ")'>Update</button>" +
+                                "</td></tr>";
+                        }
+                    }
+                })
+            $("#ticketsUnassigned").append(htmlUnassigned);
+            $("#ticketsAssigned").append(htmlAssigned);
+
+            buildUserSelect();
+        })
+    }
+
+    function GetReviewTickets() {
+        $("#ticketsReview").empty();
+        var uri = '../tickets/review';
+        $.ajax({
+            type: 'GET',
+            url: uri,
+            contentType: "application/json; charset=utf-8",
+            dataType: 'json'
+        }).done(function (data) {
+            var html;
+
+            jQuery.each(data,
+                function (index, item) {
+                    if (item.Status === 2) {
+                        html += "<tr><td>" +
+                            item.ID +
+                            "</td><td>" +
+                            item.Status +
+                            "</td><td>" +
+                            item.ProductNumber +
+                            "</td><td>" +
+                            item.Quantity +
+                            "</td><td>" +
+                            item.DropoffLocation +
+                            "</td><td>" +
+                            getUserName(item.AssignedToUserID) +
+                            "</td><td><button onClick='updateStatus(" +
+                            item.ID +
+                            ")'>Update</button>" +
+                            "</td></tr>";
+                    }
+                })
+            $("#ticketsReview").append(html);
+        })
+    }
+
+    function getUserName(userId) {
+        for (var i = 0; i < users.length; i++) {
+            if (userId == users[i].Id) {
+                return users[i].UserName;
+            }
+        }
+    }
+
+    function GetUsers() {
+        var uri = '../api/UserIdentity';
+        $.ajax({
+            type: 'GET',
+            url: uri,
+            contentType: "application/json; charset=utf-8",
+            dataType: 'json',
+            async: false
+        }).done(function (data) {
+            users = data;
+        })
+    }
+
+    function buildUserSelect() {
+        var html = "<select class='selectUser'>";
+        jQuery.each(users,
+            function (index, item) {
+                html += "<option value='" +
+                    item.Id +
+                    "'>" +
+                    item.UserName +
+                    "</option>";
+            })
+        html += "</select>";
+        $(".listofusers").append(html);
+    }
+
+    function assignUser(itemid, event) {
+        var selectTag = event.parentElement.previousSibling.firstChild;
+        var selectedUser = selectTag.options[selectTag.selectedIndex].value;
+        var uri = '../api/ticket/' + itemid;
+
+        $.ajax({
+            type: 'PUT',
+            url: uri,
+            contentType: "application/json; charset=utf-8",
+            dataType: 'json',
+            data: JSON.stringify(selectedUser),
+            success: function (data) {
+                    //GetUsers();
+                    GetTickets();
+                    GetReviewTickets();
+            }
+        })
+    }
+
+    function removeAssigned(ticketid, event) {
+        var uri = '../tickets/' + ticketid;
+
+        $.ajax({
+            type: 'PUT',
+            url: uri,
+            contentType: "application/json; charset=utf-8",
+            data: ticketid
+        }).done(function (data) {
+                //GetUsers();
+                GetTickets();
+                GetReviewTickets();
+            })
+    }
+
+    function updateStatus(ticketid) {
+        var uri = '../tickets/reivewed/' + ticketid;
+
+        $.ajax({
+            type: 'PUT',
+            url: uri,
+            contentType: "application/json; charset=utf-8",
+            data: ticketid
+        }).done(function (data) {
+                //GetUsers();
+                GetTickets();
+                GetReviewTickets();
+            })
+    }
+
+</script>
+

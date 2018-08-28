@@ -1,0 +1,290 @@
+﻿@Styles.Render("~/Content/css")
+
+<div>
+    <h4>Date Range</h4>
+    <p>
+        <label>Start Date: </label><input type="date" id="startDate" class="datePicker" />
+        <label>End Date: </label><input type="date" id="endDate" class="datePicker" />
+    </p>
+    <p>
+        <button onclick="GetTicketsbyDate(); GetTicketsDuration()">Submit</button>
+    </p>
+</div>
+
+<div>
+    <div class="row">
+        <div class="col-md-6" id="ProductsOnHandChart"></div>
+        <div class="col-md-6" id="CompletedTicketsTodayByStatus"></div>
+    </div>
+    <div class="row">
+        <div class="col-md-6" id="AverageTicketDurationByDateRange"></div>
+        <div class="col-md-6" id="CompletedTicketsByDateRange"></div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+<script src="https://code.highcharts.com/highcharts.src.js"></script>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('.datePicker').val(new Date().toDateInputValue());
+        GetProductsOnHand();
+        GetTicketStatus();
+    });
+
+    Date.prototype.toDateInputValue = (function() {
+        var local = new Date(this);
+        local.setMinutes(this.getMinutes() - this.getTimezoneOffset());
+        return local.toJSON().slice(0,10);
+    });
+
+    function graphTicketsbyDate(inputXCategories, inputYData) {
+        //inputXCategories must be an array of strings.
+        //inputYData must be a list of objects that have a data prop and the data prop is a list of numbers.
+        Highcharts.chart('CompletedTicketsByDateRange', {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: 'Tickets By Date Range'
+            },
+            xAxis: {
+                categories: inputXCategories,
+                crosshair: true
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'Number of Tickets'
+                }
+            },
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y:.1f}</b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 1
+                }
+            },
+            series: [{
+                name: "Tickets Completed",
+                data: inputYData
+            }]
+        });
+    }
+
+    function graphTicketsDuration(inputXCategories, inputYData) {
+        //inputXCategories must be an array of strings.
+        //inputYData must be a list of objects that have a data prop and the data prop is a list of numbers.
+        Highcharts.chart('AverageTicketDurationByDateRange', {
+            chart: {
+                type: 'line'
+            },
+            title: {
+                text: 'Tickets Average Duration By Day'
+            },
+            xAxis: {
+                categories: inputXCategories,
+                crosshair: true
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'Average Duration'
+                }
+            },
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y:.1f}</b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 1
+                }
+            },
+            series: [{
+                name: "Duration",
+                data: inputYData
+            }]
+        });
+    }
+
+    function graphProductOnHand(inputYData) {
+        //inputXCategories must be an array of strings.
+        //inputYData must be a list of objects that have a data prop and the data prop is a list of numbers.
+        Highcharts.chart('ProductsOnHandChart', {
+            chart: {
+                type: 'pie'
+            },
+            title: {
+                text: 'Total Products on Hand'
+            },
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y:.1f}</b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 1
+                }
+            },
+            series: [{
+                name: "Quantity",
+                data: inputYData
+            }]
+        });
+    }
+
+    function graphTicketsTodaybyStatus(inputXCategories, inputYData) {
+        //inputXCategories must be an array of strings.
+        //inputYData must be a list of objects that have a data prop and the data prop is a list of numbers.
+        Highcharts.chart('CompletedTicketsTodayByStatus', {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: 'Tickets Today By Status'
+            },
+            xAxis: {
+                categories: inputXCategories,
+                crosshair: true
+            },
+            yAxis: {
+                min: 0,
+                title: {
+                    text: 'Number of Tickets'
+                }
+            },
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y:.1f}</b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 1
+                }
+            },
+            series: [{
+                name: "Tickets",
+                data: inputYData
+            }]
+        });
+    }
+
+
+    function GetTicketsbyDate() {
+        var startDate = document.getElementById('startDate').value;
+        var endDate = document.getElementById('endDate').value;
+        var uri = '../tickets/byDate/' + startDate + '/' + endDate;
+
+        $.ajax({
+            type: 'GET',
+            url: uri,
+            contentType: "application/json; charset=utf-8",
+            dataType: 'json'
+        }).done(function (data) {
+            var datesforchart = [];
+            var ticketcountforchat = [];
+
+            jQuery.each(data,
+                function (index, item) {
+                    datesforchart.push(item.Date);
+                    ticketcountforchat.push(item.TicketsCompleted);
+                });
+
+            graphTicketsbyDate(datesforchart, ticketcountforchat);
+        });
+    }
+
+    function GetProductsOnHand() {
+        var uri = '../api/ProductOnHand';
+
+        $.ajax({
+            type: 'GET',
+            url: uri,
+            contentType: "application/json; charset=utf-8",
+            dataType: 'json'
+        }).done(function (data) {
+            var quantity = [];
+
+            jQuery.each(data,
+                function (index, item) {
+                    quantity.push({
+                        name: item.Product.PartNumber,
+                        y: item.Quantity
+                    });
+                });
+
+            graphProductOnHand(quantity);
+        });
+    }
+
+    function GetTicketsDuration() {
+        var startDate = document.getElementById('startDate').value;
+        var endDate = document.getElementById('endDate').value;
+        var uri = '../tickets/duration/' + startDate + '/' + endDate;
+
+        $.ajax({
+            type: 'GET',
+            url: uri,
+            contentType: "application/json; charset=utf-8",
+            dataType: 'json'
+        }).done(function (data) {
+            var datesforchart = [];
+            var ticketdurationforchat = [];
+
+            jQuery.each(data,
+                function (index, item) {
+                    datesforchart.push(item.Date);
+                    ticketdurationforchat.push(item.Duration);
+                });
+
+            graphTicketsDuration(datesforchart, ticketdurationforchat);
+        });
+    }
+
+    function GetTicketStatus() {
+
+        var uri = '../tickets/status';
+
+        $.ajax({
+            type: 'GET',
+            url: uri,
+            contentType: "application/json; charset=utf-8",
+            dataType: 'json'
+        }).done(function (data) {
+            var statusforchart = [];
+            var ticketcountforchat = [];
+
+            jQuery.each(data,
+                function (index, item) {
+                    statusforchart.push(item.TicketStatus);
+                    ticketcountforchat.push(item.NumberOfTickets);
+                });
+
+            graphTicketsTodaybyStatus(statusforchart, ticketcountforchat);
+        });
+    }
+
+</script>

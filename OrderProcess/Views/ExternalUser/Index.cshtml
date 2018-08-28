@@ -1,0 +1,96 @@
+﻿@Styles.Render("~/Logistics/css")
+<h2>List of Products On Hand:</h2>
+<div class="bodyContainer">
+    <div class="tableContainer">
+        <table>
+            <tr>
+                <th>Product ID</th>
+                <th>Part Number</th>
+                <th>Quantity on Hand</th>
+                <th>Part Name</th>
+                <th>Supplier</th>
+                <th>Dropoff Location</th>
+                <th>Order Quantity</th>
+                <th>Action</th>
+            </tr>
+            <tbody id="productsonhand"></tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+<script type="text/javascript">
+
+    var product = {};
+    var productOrder = {};
+
+    function Post() {
+        $.ajax({
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify(productOrder), //JSON.stringify(data),
+            url: "../api/ticket",
+            contentType: "application/json; charset=utf-8"
+        });
+    }
+
+    var uri = '../api/productonhand';
+    $(document).ready(function () {
+        $.ajax({
+            type: 'GET',
+            url: uri,
+            contentType: "application/json; charset=utf-8",
+            dataType: 'json'
+        }).done(function (data) {
+            var html;
+            product = data;
+
+            jQuery.each(data,
+                function (index, item) {
+                    html += "<tr><td>" +
+                        item.Product.ID +
+                        "</td><td>" +
+                        item.Product.PartNumber +
+                        "</td><td>" +
+                        item.Quantity +
+                        "</td><td>" +
+                        item.Product.PartName +
+                        "</td><td>" +
+                        item.Product.Supplier +
+                        "</td><td>" +
+                        item.Product.DropoffLocation +
+                        "</td><td><input type='number' id='orderQuantity" +
+                        item.Product.ID +
+                        "'></input>" +
+                        "</td><td><button onClick='Validate(" +
+                        item.Quantity +
+                        ", " +
+                        item.Product.ID +
+                        ")'>Submit</button>" +
+                        "</td></tr>";
+
+                })
+            $("#productsonhand").append(html);
+        })
+    });
+
+    function Validate(itemQuantity, productid) {
+        var quantityElement = "orderQuantity" + productid;
+        var orderQuantity = document.getElementById(quantityElement).value;
+        if (orderQuantity <= itemQuantity) {
+            GetOrderedProduct(productid);
+            productOrder.Quantity = orderQuantity;
+            Post();
+        } else {
+            alert("Order quantity must be equal to or less than quantity on hand.");
+        }
+    }
+
+    function GetOrderedProduct(productid) {
+        for (var i = 0; i < product.length; i++) {
+            if (product[i].Product.ID == productid) {
+                productOrder.Product = product[i].Product;
+            }
+        }
+    }
+</script>

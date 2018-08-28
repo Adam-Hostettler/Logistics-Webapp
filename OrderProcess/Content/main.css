@@ -1,0 +1,52 @@
+﻿body {
+    max-width: 100%
+}
+
+table {
+    max-width: 50%;
+    min-width: 50%;
+    border-collapse: collapse;
+}
+
+table, th, td {
+    text-align: center;
+    border: 1px solid black;
+}
+
+th {
+    background-color: black;
+    color: white;
+}
+
+tr:nth-child(odd) {
+    background-color: white;
+}
+
+tr:nth-child(even) {
+    background-color: lightgray;
+}
+
+#input {
+    max-width: 25%;
+}
+
+h3 {
+    text-align: center;
+}
+
+label{
+    display: block;
+    float: left;
+    clear: left;
+    padding: 5px;
+}
+
+input {
+    display: block;
+    float: left;
+}
+
+#orderQuantity {
+    width: 100%;
+    display: inline-block;
+}

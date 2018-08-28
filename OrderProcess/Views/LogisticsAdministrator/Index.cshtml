@@ -1,0 +1,56 @@
+﻿@Styles.Render("~/Content/css")
+<div>
+    <p><input type="button" class="btn btn-default" value="Create New User" onclick="location.href = '../Account/Register';" /></p>
+</div>
+<div>
+    <p>
+        <hr />
+        <h2>List of All Users:</h2>
+        <table>
+            <tr>
+                <th>User Name</th>
+                <th>User Role</th>
+            </tr>
+            <tbody id="Users"></tbody>
+        </table>
+        <hr />
+    </p>
+</div>
+<div>
+    <p><input type="button" class="btn btn-default" value="Create New User" onclick="location.href = '../Account/Register';" /></p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+<script type="text/javascript">
+
+    var users = {};
+
+    $(document).ready(function () {
+        GetUsers();
+    });
+
+    function GetUsers() {
+        var uri = '../api/UserIdentity';
+        $.ajax({
+            type: 'GET',
+            url: uri,
+            contentType: "application/json; charset=utf-8",
+            dataType: 'json'
+        }).done(function (data) {
+            var html;
+
+            jQuery.each(data,
+                function (index, item) {
+
+                    html += "<tr><td>" +
+                        item.UserName +
+                        "</td><td>" +
+                        item.RoleName +
+                        "</td></tr>";
+                });
+            $("#Users").append(html);
+        });
+    }
+
+
+</script>

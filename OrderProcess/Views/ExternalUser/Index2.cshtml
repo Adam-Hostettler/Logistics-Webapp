@@ -1,0 +1,63 @@
+﻿<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+<link rel='stylesheet' href='https://afarkas.github.io/webshim/js-webshim/minified/shims/jme/controls.css'>
+<link rel='stylesheet' href='https://afarkas.github.io/webshim/js-webshim/minified/shims/styles/shim-ext.css'>
+<link rel='stylesheet' href='https://afarkas.github.io/webshim/js-webshim/minified/shims/styles/forms-picker.css'>
+<link rel="stylesheet" href="../../Content/style.css">
+<!--<script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>-->
+
+<header>
+    <table>
+        <tr>
+            <th>Product ID</th>
+            <th>Part Number</th>
+            <th>Quantity</th>
+            <th>Part Name</th>
+            <th>Supplier</th>
+            <th>Dropoff Location</th>
+        </tr>
+        <tbody id="productsonhand"></tbody>
+    </table>
+</header>
+
+<!-- Form structure-->
+<form class="ws-validate">
+    <div id="pageOne">
+        <div class="dismiss"></div>
+        <h3>Provide Quantity to Place Order</h3>
+        <div class="form-row">
+            <label for="text">Product Id</label>
+            <input id="productId" type="text" name="text" readonly />
+        </div>
+        <div class="form-row">
+            <label for="text">Part Number</label>
+            <input id="partNumber" type="text" name="text" readonly />
+        </div>
+        <div class="form-row">
+            <label for="text">Part Name</label>
+            <input id="partName" type="text" name="text" readonly />
+        </div>
+        <div class="form-row">
+            <label for="text">Supplier</label>
+            <input id="partSupplier" type="text" name="text" readonly />
+        </div>
+        <div class="form-row">
+            <label for="text">Dropoff Location</label>
+            <input id="partDropoffLocation" type="text" name="text" readonly />
+        </div>
+        <div class="form-row">
+            <label for="number">Quantity</label>
+            <input id="formQuantity" type="number" name="number" required="required" />
+        </div>
+        <div class="advance">
+            <button class="next" id="postForm" type="submit">Submit</button>
+        </div>
+    </div>
+</form>
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/productonhandhelper")    
+    @Scripts.Render("~/bundles/fancyforms")
+}

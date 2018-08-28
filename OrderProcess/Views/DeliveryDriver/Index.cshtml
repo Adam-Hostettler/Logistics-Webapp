@@ -1,0 +1,72 @@
+﻿@Styles.Render("~/Logistics/css")
+<h2>List of Tickets Assigned To You:</h2>
+<div>
+    <table>
+        <tr>
+            <th>Ticket ID</th>
+            <th>Ticket Status</th>
+            <th>Part Number</th>
+            <th>Quantity</th>
+            <th>Dropoff Location</th>
+            <th>Action</th>
+        </tr>
+        <tbody id="tickets"></tbody>
+    </table>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        GetTicketsForDelivery();
+    });
+
+    function GetTicketsForDelivery() {
+        $("#tickets").empty();
+        var uri = '../tickets/delivery';
+        $.ajax({
+            type: 'GET',
+            url: uri,
+            contentType: "application/json; charset=utf-8",
+            dataType: 'json'
+        }).done(function (data) {
+            var html;
+
+            jQuery.each(data,
+                function (index, item) {
+                    console.log(item);
+                    html += "<tr><td>" +
+                        item.ID +
+                        "</td><td>" +
+                        item.Status +
+                        "</td><td>" +
+                        item.ProductNumber +
+                        "</td><td>" +
+                        item.Quantity +
+                        "</td><td>" +
+                        item.DropoffLocation +
+                        "</td><td><button onClick='updateTicketStatus(" +
+                        item.ID +
+                        ")'>Update</button>" +
+                        "</td></tr>";
+
+                })
+            $("#tickets").append(html);
+        })
+    }
+
+    function updateTicketStatus(ticketId) {
+        var uri = '../tickets/delivered/' + ticketId;
+
+        $.ajax({
+            type: 'PUT',
+            url: uri,
+            contentType: "application/json; charset=utf-8",
+            data: ticketId
+        }).done(function (data) {
+            GetTicketsForDelivery();
+        })
+    }
+
+</script>
+

@@ -1,0 +1,81 @@
+﻿@using Microsoft.AspNet.Identity
+@{
+    ViewBag.UserId = HttpContext.Current.User.Identity.GetUserId();
+}
+@Styles.Render("~/Logistics/css")
+<h2>List of Tickets Assigned To You:</h2>
+<div>
+    <table>
+        <tr>
+            <th>Ticket ID</th>
+            <th>Ticket Status</th>
+            <th>Part Number</th>
+            <th>Quantity</th>
+            <th>Dropoff Location</th>
+            <th>Action</th>
+        </tr>
+        <tbody id="tickets"></tbody>
+    </table>
+</div>
+<input type="hidden" id="customInput" data-value="@ViewBag.UserId" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.js"></script>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        onPageLoad();
+    });
+
+    function onPageLoad() {
+        var userId = $("#customInput").data("value");
+        GetUsersTickets(userId);
+    }
+
+    function GetUsersTickets(userId) {
+        $("#tickets").empty();
+        var uri = '../tickets/' + userId;
+        $.ajax({
+            type: 'GET',
+            url: uri,
+            contentType: "application/json; charset=utf-8",
+            dataType: 'json'
+        }).done(function (data) {
+            var html;
+
+            jQuery.each(data,
+                function (index, item) {
+
+                    html += "<tr><td>" +
+                            item.ID +
+                            "</td><td>" +
+                            item.Status +
+                            "</td><td>" +
+                            item.ProductNumber +
+                            "</td><td>" +
+                            item.Quantity +
+                            "</td><td>" +
+                            item.DropoffLocation +                            
+                            "</td><td><button onClick='UpdateStatus(" +
+                            item.ID +
+                            ")'>Picked</button>" +
+                            "</td></tr>";
+                    
+                })
+            $("#tickets").append(html);
+
+        })
+    }
+
+    function UpdateStatus(ticketId) {
+        var uri = '../tickets/status/' + ticketId;
+
+        $.ajax({
+            type: 'PUT',
+            url: uri,
+            contentType: "application/json; charset=utf-8",
+            data: ticketId
+        }).done(function (data) {
+            onPageLoad();
+        })
+    }
+
+</script>
